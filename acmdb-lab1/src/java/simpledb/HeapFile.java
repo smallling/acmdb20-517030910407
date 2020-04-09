@@ -125,7 +125,7 @@ public class HeapFile implements DbFile {
 
     class HeapFileIterator extends AbstractDbFileIterator {
         Iterator<Tuple> it;
-        int curCnt = 0;
+        int curCnt;
         TransactionId tid;
         HeapFile hf;
 
