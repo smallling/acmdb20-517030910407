@@ -183,6 +183,7 @@ public class HeapFile implements DbFile {
         }
 
         public void close() {
+            super.close();
             it = null;
             curCnt = 0;
         }
