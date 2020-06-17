@@ -369,14 +369,8 @@ public class BufferPool {
         }
 
         private void removeSharedLock(TransactionId tid, PageId pid) {
-            HashSet<TransactionId> curShared = shared.get(pid);
-            curShared.remove(tid);
-            if(curShared.size() == 0) {
-                shared.remove(pid);
-            }
-            else {
-                shared.put(pid, curShared);
-            }
+            shared.get(pid).remove(tid);
+            sharedPage.putIfAbsent(tid, new HashSet<>());
             sharedPage.get(tid).remove(pid);
         }
 
