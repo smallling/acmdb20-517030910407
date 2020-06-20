@@ -118,7 +118,7 @@ public class HeapFile implements DbFile {
         else {
             page.insertTuple(t);
         }
-        return new ArrayList<>(Arrays.asList(page));
+        return new ArrayList<>(Collections.singletonList(page));
     }
 
     // see DbFile.java for javadocs
@@ -127,7 +127,7 @@ public class HeapFile implements DbFile {
         PageId pid = t.getRecordId().getPageId();
         HeapPage page = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
         page.deleteTuple(t);
-        return new ArrayList<>(Arrays.asList(page));
+        return new ArrayList<>(Collections.singletonList(page));
     }
 
     // see DbFile.java for javadocs
