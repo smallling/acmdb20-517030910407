@@ -64,30 +64,23 @@ public class HeapFile implements DbFile {
 
     // see DbFile.java for javadocs
     public Page readPage(PageId pid) {
-        RandomAccessFile fin = null;
-         try {
-            fin = new RandomAccessFile(f, "r");
-            byte readByte[] = new byte[BufferPool.getPageSize()];
-            if(fin.skipBytes(pid.pageNumber() * BufferPool.getPageSize()) != pid.pageNumber() * BufferPool.getPageSize()) {
-                throw new IllegalArgumentException();
-            }
-            int tmp = fin.read(readByte, 0, BufferPool.getPageSize());
-            if(tmp == -1 || tmp < BufferPool.getPageSize()) {
-                throw new IllegalArgumentException();
-            }
-            Page nowPage = new HeapPage((HeapPageId) pid, readByte);
-            return nowPage;
+        int len = BufferPool.getPageSize();
+        int offset = pid.pageNumber() * len;
+        if(offset + len > this.getFile().length()) {
+            throw new IllegalArgumentException();
+        }
+        byte[] data = new byte[len];
+        RandomAccessFile file = null;
+        HeapPage page = null;
+        try {
+            file = new RandomAccessFile(this.getFile(), "r");
+            file.seek(offset);
+            file.readFully(data);
+            page = new HeapPage((HeapPageId) pid, data);
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-             try {
-                 if(fin != null) {
-                     fin.close();
-                 }
-             } catch (IOException e) {
-
-             }
-         }
+            throw new IllegalArgumentException();
+        }
+        return page;
     }
 
     // see DbFile.java for javadocs
