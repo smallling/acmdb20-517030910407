@@ -429,6 +429,7 @@ public class BufferPool {
         public synchronized void releaseAllLock(TransactionId tid) {
             if(sharedPage.get(tid) != null) {
                 for(PageId pid : sharedPage.get(tid)) {
+                    shared.putIfAbsent(pid, new HashSet<>());
                     shared.get(pid).remove(tid);
                 }
                 sharedPage.remove(tid);
