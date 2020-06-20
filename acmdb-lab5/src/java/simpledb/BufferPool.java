@@ -82,7 +82,11 @@ public class BufferPool {
         throws TransactionAbortedException, DbException {
         boolean flag = myLock.acquireLock(tid, pid, perm);
         while(!flag) {
-            Thread.yield();
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             flag = myLock.acquireLock(tid, pid, perm);
         }
         if(bufferMap.containsKey(pid)) {
@@ -321,7 +325,6 @@ public class BufferPool {
                 flag = acquireExclusiveLock(tid, pid);
             }
             if(!flag) {
-                Thread.yield();
                 waitGraph.putIfAbsent(tid, new HashSet<>());
                 if(perm.equals(Permissions.READ_ONLY)) {
                     TransactionId curExclusive = exclusive.get(pid);
@@ -360,7 +363,7 @@ public class BufferPool {
         }
 
         private boolean acquireSharedLock(TransactionId tid, PageId pid) {
-            TransactionId curExclusive= exclusive.get(pid);
+            TransactionId curExclusive = exclusive.get(pid);
             if(curExclusive != null) {
                 return curExclusive.equals(tid);
             }
