@@ -399,6 +399,7 @@ public class BufferPool {
 
         private void removeExclusiveLock(TransactionId tid, PageId pid) {
             exclusive.remove(pid);
+            exclusivePage.putIfAbsent(tid, new HashSet<>());
             exclusivePage.get(tid).remove(pid);
         }
 
