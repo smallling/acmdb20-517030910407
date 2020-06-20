@@ -70,10 +70,9 @@ public class HeapFile implements DbFile {
             throw new IllegalArgumentException();
         }
         byte[] data = new byte[len];
-        RandomAccessFile file = null;
         HeapPage page = null;
         try {
-            file = new RandomAccessFile(this.getFile(), "r");
+            RandomAccessFile file = new RandomAccessFile(this.getFile(), "r");
             file.seek(offset);
             file.readFully(data);
             page = new HeapPage((HeapPageId) pid, data);
@@ -87,7 +86,7 @@ public class HeapFile implements DbFile {
     public void writePage(Page page) throws IOException {
         RandomAccessFile file = new RandomAccessFile(this.getFile(), "rw");
         file.seek(BufferPool.getPageSize() * page.getId().pageNumber());
-        file.write(page.getPageData(), 0, BufferPool.getPageSize());
+        file.write(page.getPageData());
         file.close();
     }
 
