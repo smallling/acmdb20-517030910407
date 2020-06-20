@@ -145,6 +145,7 @@ public class BufferPool {
                 if (commit) {
                     if (curPage.isDirty() != null) {
                         flushPage(pid);
+                        curPage.setBeforeImage();
                     }
                 } else {
                     bufferMap.put(pid, curPage.getBeforeImage());
