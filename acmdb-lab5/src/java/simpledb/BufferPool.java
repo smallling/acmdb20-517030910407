@@ -324,13 +324,8 @@ public class BufferPool {
             if(!flag) {
                 Thread.yield();
                 waitGraph.putIfAbsent(tid, new HashSet<>());
-                if(perm.equals(Permissions.READ_ONLY)) {
-                    TransactionId curExclusive = exclusive.get(pid);
-                    if(curExclusive != null) {
-                        waitGraph.get(tid).add(curExclusive);
-                    }
-                }
-                else {
+                waitGraph.get(tid).clear();
+                {
                     HashSet<TransactionId> curShared = shared.get(pid);
                     if(curShared != null) {
                         for(TransactionId t : curShared) {
@@ -360,7 +355,7 @@ public class BufferPool {
         }
 
         private boolean acquireSharedLock(TransactionId tid, PageId pid) {
-            TransactionId curExclusive= exclusive.get(pid);
+            TransactionId curExclusive = exclusive.get(pid);
             if(curExclusive != null) {
                 return curExclusive.equals(tid);
             }
