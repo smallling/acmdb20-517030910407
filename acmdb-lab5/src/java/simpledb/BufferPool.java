@@ -89,7 +89,7 @@ public class BufferPool {
             return bufferMap.get(pid);
         }
         else {
-            while(bufferMap.size() >= maxPage) {
+            if(bufferMap.size() >= maxPage) {
                 evictPage();
             }
             Page tmp = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
@@ -263,11 +263,6 @@ public class BufferPool {
             Page p = bufferMap.get(pid);
             if(p.isDirty() != null) {
                 continue;
-            }
-            try {
-                flushPage(pid);
-            } catch (IOException e) {
-                e.printStackTrace();
             }
             discardPage(pid);
             return;
