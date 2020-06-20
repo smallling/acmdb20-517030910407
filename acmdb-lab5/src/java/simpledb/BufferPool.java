@@ -324,8 +324,13 @@ public class BufferPool {
             if(!flag) {
                 Thread.yield();
                 waitGraph.putIfAbsent(tid, new HashSet<>());
-                waitGraph.get(tid).clear();
-                {
+                if(perm.equals(Permissions.READ_ONLY)) {
+                    TransactionId curExclusive = exclusive.get(pid);
+                    if(curExclusive != null) {
+                        waitGraph.get(tid).add(curExclusive);
+                    }
+                }
+                else {
                     HashSet<TransactionId> curShared = shared.get(pid);
                     if(curShared != null) {
                         for(TransactionId t : curShared) {
@@ -355,7 +360,7 @@ public class BufferPool {
         }
 
         private boolean acquireSharedLock(TransactionId tid, PageId pid) {
-            TransactionId curExclusive = exclusive.get(pid);
+            TransactionId curExclusive= exclusive.get(pid);
             if(curExclusive != null) {
                 return curExclusive.equals(tid);
             }
@@ -364,10 +369,14 @@ public class BufferPool {
         }
 
         private void removeSharedLock(TransactionId tid, PageId pid) {
-            shared.putIfAbsent(pid, new HashSet<>());
             shared.get(pid).remove(tid);
-            sharedPage.putIfAbsent(tid, new HashSet<>());
+            if(shared.get(pid).size() == 0) {
+                shared.remove(pid);
+            }
             sharedPage.get(tid).remove(pid);
+            if(sharedPage.get(tid).size() == 0) {
+                sharedPage.remove(tid);
+            }
         }
 
         private void addExclusiveLock(TransactionId tid, PageId pid) {
@@ -385,7 +394,7 @@ public class BufferPool {
             if(curShared != null && (curShared.size() > 1 || (curShared.size() == 1 && !curShared.contains(tid)))) {
                 return false;
             }
-            if(curShared != null && curShared.size() > 0) {
+            if(curShared != null) {
                 removeSharedLock(tid, pid);
             }
             addExclusiveLock(tid, pid);
@@ -394,8 +403,10 @@ public class BufferPool {
 
         private void removeExclusiveLock(TransactionId tid, PageId pid) {
             exclusive.remove(pid);
-            exclusivePage.putIfAbsent(tid, new HashSet<>());
             exclusivePage.get(tid).remove(pid);
+            if(exclusivePage.get(tid).size() == 0) {
+                exclusivePage.remove(tid);
+            }
         }
 
         public synchronized boolean holdsLock(TransactionId tid, PageId pid) {
@@ -424,8 +435,10 @@ public class BufferPool {
         public synchronized void releaseAllLock(TransactionId tid) {
             if(sharedPage.get(tid) != null) {
                 for(PageId pid : sharedPage.get(tid)) {
-                    shared.putIfAbsent(pid, new HashSet<>());
                     shared.get(pid).remove(tid);
+                    if(shared.get(pid).size() == 0) {
+                        shared.remove(pid);
+                    }
                 }
                 sharedPage.remove(tid);
             }
