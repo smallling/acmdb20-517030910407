@@ -390,7 +390,7 @@ public class BufferPool {
             if(curShared != null && (curShared.size() > 1 || (curShared.size() == 1 && !curShared.contains(tid)))) {
                 return false;
             }
-            if(curShared != null) {
+            if(curShared != null && curShared.size() > 0) {
                 removeSharedLock(tid, pid);
             }
             addExclusiveLock(tid, pid);
