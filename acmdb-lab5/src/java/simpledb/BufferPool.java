@@ -145,7 +145,6 @@ public class BufferPool {
                 if (commit) {
                     if (curPage.isDirty() != null) {
                         flushPage(pid);
-                        curPage.setBeforeImage();
                     }
                 } else {
                     bufferMap.put(pid, curPage.getBeforeImage());
@@ -337,7 +336,6 @@ public class BufferPool {
                     }
                 }
                 if(deadLock(tid)) {
-                    waitGraph.remove(tid);
                     throw new TransactionAbortedException();
                 }
             }
@@ -432,7 +430,6 @@ public class BufferPool {
                 }
                 exclusivePage.remove(tid);
             }
-            waitGraph.remove(tid);
         }
 
         public synchronized HashSet<PageId> getExclusivePage(TransactionId tid) {
