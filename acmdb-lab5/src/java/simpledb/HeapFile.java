@@ -178,8 +178,10 @@ public class HeapFile implements DbFile {
         }
 
         public void rewind() throws DbException, TransactionAbortedException {
-            close();
-            open();
+            curCnt = 0;
+            HeapPageId curPageId = new HeapPageId(hf.getId(), curCnt);
+            HeapPage curPage = (HeapPage) Database.getBufferPool().getPage(tid, curPageId, Permissions.READ_ONLY);
+            it = curPage.iterator();
         }
 
         public void close() {
