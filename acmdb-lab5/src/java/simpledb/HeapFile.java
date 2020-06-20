@@ -111,9 +111,9 @@ public class HeapFile implements DbFile {
         HeapPage page = null;
         for(int i = 0; i < numPages(); i++) {
             PageId pid = new HeapPageId(getId(), i);
-            HeapPage curpage = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
+            HeapPage curpage = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_ONLY);
             if(curpage.getNumEmptySlots() > 0) {
-                page = curpage;
+                page = (HeapPage) Database.getBufferPool().getPage(tid, pid, Permissions.READ_WRITE);
                 break;
             }
         }
