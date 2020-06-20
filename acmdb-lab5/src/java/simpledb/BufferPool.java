@@ -89,7 +89,7 @@ public class BufferPool {
             return bufferMap.get(pid);
         }
         else {
-            if(bufferMap.size() >= maxPage) {
+            while(bufferMap.size() >= maxPage) {
                 evictPage();
             }
             Page tmp = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
@@ -176,6 +176,9 @@ public class BufferPool {
         ArrayList<Page> pageList = file.insertTuple(tid, t);
         for(Page page : pageList) {
             PageId pid = page.getId();
+            while(!bufferMap.containsKey(pid) && bufferMap.size() >= maxPage) {
+                evictPage();
+            }
             page.markDirty(true, tid);
             bufferMap.put(pid, page);
         }
@@ -201,6 +204,9 @@ public class BufferPool {
         ArrayList<Page> pageList = file.deleteTuple(tid, t);
         for(Page page : pageList) {
             PageId pid = page.getId();
+            while(!bufferMap.containsKey(pid) && bufferMap.size() >= maxPage) {
+                evictPage();
+            }
             page.markDirty(true, tid);
             bufferMap.put(pid, page);
         }
